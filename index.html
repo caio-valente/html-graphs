@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- <title>Parcel Sandbox</title> -->
+    <meta charset="UTF-8" />
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/series-label.js"></script>
+    <!-- <script src="https://code.highcharts.com/modules/exporting.js"></script> -->
+    <!-- <script src="https://code.highcharts.com/modules/export-data.js"></script> -->
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+  </head>
+
+  <body>
+    <style>
+      .spacer {
+        min-height: 125vh;
+      }
+    </style>
+    <div class="spacer">Scroll below to activate graph</div>
+    <div id="reach1"></div>
+    <div id="container1"></div>
+    <div class="spacer">Scroll below to activate graph</div>
+    <div id="reach2"></div>
+    <div id="container2"></div>
+    <div class="spacer">Scroll below to activate graph</div>
+    <div id="reach3"></div>
+    <div id="container3"></div>
+    <div class="spacer">Scroll below to activate graph</div>
+    <div id="reach4"></div>
+    <div id="container4"></div>
+    <div class="spacer">Scroll below to activate graph</div>
+    <div id="reach5"></div>
+    <div id="container5"></div>
+    <div class="spacer">Scroll below to activate graph</div>
+    <div id="reach6"></div>
+    <div id="container6"></div>
+    <script>
+      let data_y1 = [
+        0.0,
+        0.0624,
+        0.1046,
+        0.1174,
+        0.1502,
+        0.2082,
+        0.2348,
+        0.287,
+        0.3389,
+        0.3708,
+        0.3808,
+        0.4246,
+        0.4538,
+        0.4784,
+        0.5232,
+        0.5486,
+        0.5832,
+        0.6227,
+        0.647,
+        0.6668,
+        0.7105,
+        0.7439,
+        0.7681,
+        0.8166,
+        0.9134,
+        0.9096,
+        0.8705,
+        0.8686,
+        0.8935,
+        0.9282,
+        0.9566,
+        0.9325,
+        0.8805,
+        0.8736,
+        0.877,
+        0.8849,
+        0.8703,
+        0.8618,
+        0.8725,
+        0.8467,
+        0.8402,
+        0.8393,
+        0.8237,
+        0.8202,
+        0.832,
+        0.8346,
+        0.8389,
+        0.8276,
+        0.8287,
+        0.8487,
+        0.8927,
+        0.9198,
+        0.9296,
+        0.956,
+        0.9949,
+        1.0158,
+        1.0056,
+        0.9973,
+        0.9988,
+        1.0145,
+        1.0139,
+        1.093,
+        1.11,
+        1.0847,
+        1.065,
+        1.084,
+        1.0908,
+        1.1241,
+        1.1439,
+        1.1467,
+        1.1562
+      ];
+      let data_y2 = [
+        0.0,
+        0.0155,
+        0.0934,
+        0.1224,
+        0.1549,
+        0.1941,
+        0.2144,
+        0.2638,
+        0.2659,
+        0.3004,
+        0.3272,
+        0.3763,
+        0.4006,
+        0.4437,
+        0.498,
+        0.5503,
+        0.5994,
+        0.6492,
+        0.6995,
+        0.7198,
+        0.7713,
+        0.7785,
+        0.8035,
+        0.871,
+        0.922,
+        0.9696,
+        0.9383,
+        0.9811,
+        1.0359,
+        1.0605,
+        1.0827,
+        1.0811,
+        1.0677,
+        1.105,
+        1.0837,
+        1.1451,
+        1.2021,
+        1.2365,
+        1.2828,
+        1.288,
+        1.3201,
+        1.3412,
+        1.3695,
+        1.385,
+        1.4748,
+        1.4851,
+        1.5054,
+        1.5159,
+        1.5624,
+        1.6072,
+        1.6621,
+        1.7346,
+        1.7947,
+        1.8371,
+        1.915,
+        2.0122,
+        2.0929,
+        2.1529,
+        2.1761,
+        2.1978,
+        2.2139,
+        2.2875,
+        2.3823,
+        2.3821,
+        2.3957,
+        2.4096,
+        2.4291,
+        2.4575,
+        2.4634,
+        2.4978,
+        2.529
+      ];
+      var observer = new IntersectionObserver(
+        function (entries) {
+          // isIntersecting is true when element and viewport are overlapping
+          // isIntersecting is false when element and viewport don't overlap
+          if (entries[0].isIntersecting === true) {
+            make_graph(entries);
+            observer.unobserve(entries[0].target);
+          }
+        },
+        { threshold: [0] }
+      );
+
+      observer.observe(document.querySelector("#reach1"));
+      observer.observe(document.querySelector("#reach2"));
+      observer.observe(document.querySelector("#reach3"));
+      observer.observe(document.querySelector("#reach4"));
+      observer.observe(document.querySelector("#reach5"));
+      observer.observe(document.querySelector("#reach6"));
+      function make_graph(entries) {
+        map = {
+          reach1: "container1",
+          reach2: "container2",
+          reach3: "container3",
+          reach4: "container4",
+          reach5: "container5",
+          reach6: "container6"
+        };
+        Highcharts.chart(map[String(entries[0].target.id)], {
+          title: {
+            text: "Productivity and Pay, 1948-2018"
+          },
+
+          // subtitle: {
+          //   text: "Source: thesolarfoundation.com"
+          // },
+
+          yAxis: {
+            title: {
+              text: ""
+            },
+            labels: {
+              format: "{value}%"
+            }
+          },
+
+          xAxis: {
+            accessibility: {
+              rangeDescription: "Range: 1948 to 2018"
+            }
+          },
+
+          legend: {
+            layout: "vertical",
+            align: "right",
+            verticalAlign: "middle"
+          },
+
+          tooltip: {
+            formatter: function () {
+              return (
+                "<b>" +
+                this.x +
+                "</b> <br>" +
+                this.series.name +
+                ": <b>" +
+                Math.round(this.y * 100 * 100) / 100 +
+                "% </b>"
+              );
+            }
+          },
+
+          plotOptions: {
+            series: {
+              label: {
+                connectorAllowed: false
+              },
+              pointStart: 1948
+            }
+          },
+
+          series: [
+            {
+              name: "Net productivity",
+              data: data_y1
+            },
+            {
+              name: "Hourly compensation",
+              data: data_y2
+            }
+            // {
+            //   name: "Sales & Distribution",
+            //   data: [11744, 17722, 16005, 19771, 20185, 24377, 32147, 39387]
+            // },
+            // {
+            //   name: "Project Development",
+            //   data: [null, null, 7988, 12169, 15112, 22452, 34400, 34227]
+            // },
+            // {
+            //   name: "Other",
+            //   data: [12908, 5948, 8105, 11248, 8989, 11816, 18274, 18111]
+            // }
+          ],
+
+          responsive: {
+            rules: [
+              {
+                condition: {
+                  maxWidth: 500
+                },
+                chartOptions: {
+                  legend: {
+                    layout: "horizontal",
+                    align: "center",
+                    verticalAlign: "bottom"
+                  }
+                }
+              }
+            ]
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
