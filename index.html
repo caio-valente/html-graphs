@@ -11,7 +11,7 @@
   </head>
 
   <body>
-    <div id="reach1"></div>
+<!--     <div id="reach1"></div> -->
     <div id="container1"></div>
     <script>
       let data_y1 = [
@@ -160,24 +160,20 @@
         2.4978,
         2.529
       ];
-      var observer = new IntersectionObserver(
-        function (entries) {
-          // isIntersecting is true when element and viewport are overlapping
-          // isIntersecting is false when element and viewport don't overlap
-          if (entries[0].isIntersecting === true) {
-            make_graph(entries);
-            observer.unobserve(entries[0].target);
-          }
-        },
-        { threshold: [0] }
-      );
+//       var observer = new IntersectionObserver(
+//         function (entries) {
+//           // isIntersecting is true when element and viewport are overlapping
+//           // isIntersecting is false when element and viewport don't overlap
+//           if (entries[0].isIntersecting === true) {
+//             make_graph(entries);
+//             observer.unobserve(entries[0].target);
+//           }
+//         },
+//         { threshold: [0] }
+//       );
 
-      observer.observe(document.querySelector("#reach1"));
-      observer.observe(document.querySelector("#reach2"));
-      observer.observe(document.querySelector("#reach3"));
-      observer.observe(document.querySelector("#reach4"));
-      observer.observe(document.querySelector("#reach5"));
-      observer.observe(document.querySelector("#reach6"));
+//       observer.observe(document.querySelector("#reach1"));
+      make_graph()
       function make_graph(entries) {
         map = {
           reach1: "container1",
@@ -187,7 +183,8 @@
           reach5: "container5",
           reach6: "container6"
         };
-        Highcharts.chart(map[String(entries[0].target.id)], {
+//         map[String(entries[0].target.id)]
+        Highcharts.chart("container1", {
           title: {
             text: "Productivity and Pay, 1948-2018"
           },
