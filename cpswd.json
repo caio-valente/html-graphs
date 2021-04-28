@@ -1,11 +1,17 @@
 {
   "title": "S & P 500 index and CEO direct compensation ($ millions),<br>1965-2016",
   "min_x": 1965,
-  "min_y": 0.92,
+  "min_y": [
+    0.92,
+    300.13
+  ],
   "max_x": 2018,
-  "max_y": 2746.21,
+  "max_y": [
+    2746.21,
+    2746.21
+  ],
   "has_multiaxis": true,
-  "annotation1": "CEO compensation (millions, 2018$)",
+  "annotation1": "CEO compensation<br>(millions, 2018$)",
   "annotation2": "S&P 500 index",
   "annotation3": "",
   "yaxis_tickformat": "$",

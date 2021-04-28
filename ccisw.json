@@ -1,11 +1,17 @@
 {
   "title": "Percent of All Campaign Spending with Percent of All<br> Income for the Top 0.01%, 1980 - 2016",
   "min_x": 1980,
-  "min_y": 0.0085883,
+  "min_y": [
+    0.0085883,
+    0.0085883
+  ],
   "max_x": 2016,
-  "max_y": 0.4183,
+  "max_y": [
+    0.4183,
+    0.04771
+  ],
   "has_multiaxis": false,
-  "annotation1": "Share of All Campaign Contributions",
+  "annotation1": "Share of All<br>Campaign Contributions",
   "annotation2": "Share of National Income",
   "annotation3": "",
   "yaxis_tickformat": "%",

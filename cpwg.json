@@ -1,14 +1,20 @@
 {
   "title": "Corporate Profits 1947-2019",
   "min_x": 1947,
-  "min_y": 19.816,
+  "min_y": [
+    19.816,
+    0
+  ],
   "max_x": 2020,
-  "max_y": 2118.856,
+  "max_y": [
+    2118.856,
+    0
+  ],
   "has_multiaxis": false,
   "annotation1": "",
   "annotation2": "",
   "annotation3": "",
-  "yaxis_tickformat": "%",
+  "yaxis_tickformat": "$",
   "x": [
     1947,
     1948,
