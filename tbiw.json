@@ -2,12 +2,12 @@
   "title": "Individual Income (2018$) and Relative Income<br>of Top 0.1% and Bottom 90%",
   "min_x": 1962,
   "min_y": [
-    0.4348759681987239,
+    22750,
     0.4348759681987239
   ],
   "max_x": 2019,
   "max_y": [
-    6296005.0,
+    6296005,
     1.4748374240583233
   ],
   "has_multiaxis": true,
