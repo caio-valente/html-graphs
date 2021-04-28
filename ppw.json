@@ -8,6 +8,7 @@
   "annotation1": "Net productivity",
   "annotation2": "Hourly compensation",
   "annotation3": "",
+  "yaxis_tickformat": "%",
   "x": [
     1948,
     1949,

@@ -8,6 +8,7 @@
   "annotation1": "Share of All Campaign Contributions",
   "annotation2": "Share of National Income",
   "annotation3": "",
+  "yaxis_tickformat": "%",
   "x": [
     1980,
     1981,

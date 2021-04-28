@@ -8,6 +8,7 @@
   "annotation1": "CEO compensation (millions, 2018$)",
   "annotation2": "S&P 500 index",
   "annotation3": "",
+  "yaxis_tickformat": "$",
   "x": [
     1965,
     1966,

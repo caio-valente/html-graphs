@@ -8,6 +8,7 @@
   "annotation1": "",
   "annotation2": "",
   "annotation3": "",
+  "yaxis_tickformat": "%",
   "x": [
     1940,
     1941,
