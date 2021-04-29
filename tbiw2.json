@@ -11,8 +11,8 @@
     42.0
   ],
   "has_multiaxis": true,
-  "annotation1": "Average Income of<br>Top 0.1%/100 X<br>that of Bottom 90%",
-  "annotation2": "% with Alot of<br>Confidence in Congress",
+  "annotation1": "Top / Bottom Income Ratio",
+  "annotation2": "Confidence in Congress",
   "annotation3": "",
   "yaxis_tickformat": "",
   "x": [
