@@ -19,22 +19,22 @@
     </style>
     <div class="spacer">Scroll below to activate graph</div>
     <div id="reach1"></div>
-    <div style="min-height: 500px;" id="container1"></div>
+    <div style="min-height: 500px; max-width: 800px;" id="container1"></div>
     <div class="spacer">Scroll below to activate graph</div>
     <div id="reach2"></div>
-    <div style="min-height: 500px;" id="container2"></div>
+    <div style="min-height: 500px; max-width: 800px;" id="container2"></div>
     <div class="spacer">Scroll below to activate graph</div>
     <div id="reach3"></div>
-    <div style="min-height: 500px;" id="container3"></div>
+    <div style="min-height: 500px; max-width: 800px;" id="container3"></div>
     <div class="spacer">Scroll below to activate graph</div>
     <div id="reach4"></div>
-    <div style="min-height: 500px;" id="container4"></div>
+    <div style="min-height: 500px; max-width: 800px;" id="container4"></div>
     <div class="spacer">Scroll below to activate graph</div>
     <div id="reach5"></div>
-    <div style="min-height: 500px;" id="container5"></div>
+    <div style="min-height: 500px; max-width: 800px;" id="container5"></div>
     <div class="spacer">Scroll below to activate graph</div>
     <div id="reach6"></div>
-    <div style="min-height: 500px;" id="container6"></div>
+    <div style="min-height: 500px; max-width: 800px;" id="container6"></div>
 
     <script>
       var myurl1 = "https://caio-valente.github.io/html-graphs/ccisw.json";
@@ -56,7 +56,7 @@
             observer.unobserve(entries[0].target);
           }
         },
-        { threshold: [0] }
+        { threshold: [0.3] }
       );
       observer.observe(document.querySelector("#reach1"));
       observer.observe(document.querySelector("#reach2"));
