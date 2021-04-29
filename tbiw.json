@@ -14,6 +14,7 @@
   "annotation1": "Income of Top 0.1%",
   "annotation2": "Income of Top 0.1%/<br>100 X Income<br>of Bottom 90%",
   "annotation3": "Income of Bottom 90%",
+  "yaxis_tickformat": "$",
   "x": [
     1962,
     1963,
