@@ -14,7 +14,7 @@
   "annotation1": "",
   "annotation2": "",
   "annotation3": "",
-  "yaxis_tickformat": "f",
+  "yaxis_tickformat": "$",
   "x": [
     1947,
     1948,
