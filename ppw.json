@@ -11,8 +11,8 @@
     2.529
   ],
   "has_multiaxis": false,
-  "annotation1": "Net productivity",
-  "annotation2": "Hourly compensation",
+  "annotation1": "Hourly compensation",
+  "annotation2": "Net productivity",
   "annotation3": "",
   "yaxis_tickformat": "%",
   "x": [
