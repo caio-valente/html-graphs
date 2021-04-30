@@ -14,7 +14,7 @@
   "annotation1": "Top / Bottom Income Ratio",
   "annotation2": "Confidence in Congress",
   "annotation3": "",
-  "yaxis_tickformat": "",
+  "yaxis_tickformat": "f",
   "x": [
     1973,
     1974,
