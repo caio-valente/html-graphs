@@ -23,7 +23,7 @@
 
     <!-- Spacer for testing -->
     <div class="spacer">
-      Scroll below to activate graph.
+      Scroll below to activate graph. 
     </div>
 
     <!-- Place this code on the position for the graph 1 -->
@@ -41,7 +41,7 @@
 
     <!-- Spacer for testing -->
     <div class="spacer">
-      Scroll below to activate graph.
+      Scroll below to activate graph. 
     </div>
 
     <!-- Place this code on the position for the graph 3 -->
@@ -59,7 +59,7 @@
 
     <!-- Spacer for testing -->
     <div class="spacer">
-      Scroll below to activate graph. 
+      Scroll below to activate graph.
     </div>
 
     <!-- Place this code on the position for the graph 5 -->
@@ -68,7 +68,7 @@
 
     <!-- Spacer for testing -->
     <div class="spacer">
-      Scroll below to activate graph. 
+      Scroll below to activate graph.
     </div>
 
     <!-- Place this code on the position for the graph 6 -->
@@ -147,6 +147,7 @@
         let frames = []; // Animation frames
         let n = raw.x.length; // Number of frames
         let percent = ""; // Add percent symbol on hover
+        let hover_round = ""; // Round hover values
         let traces = []; // Lines
         let annotations = []; // Line titles
         let primary_range = []; // Primary Y Axis Range
@@ -182,16 +183,19 @@
           layout = { ...layout, showlegend: false };
         }
         if (target == "container3") {
+          hover_round = "f";
           symbol = "$";
           fill = "tozeroy";
         }
         if (target == "container4") {
+          symbol = "";
           dtick = 5;
         }
         if (target == "container5") {
           layout = { ...layout, showlegend: false };
         }
         if (target == "container6") {
+          hover_round = "r";
           percent = "%";
           dtick = 5;
           layout = { ...layout, showlegend: false };
@@ -204,10 +208,10 @@
           layout = {
             ...layout,
             yaxis2: {
-              range: [0.8 * raw.min_y[1], 1.2 * raw.max_y[1]],
+              range: [0.8 * raw.min_y[1], 1.15 * raw.max_y[1]],
               overlaying: "y",
               side: "right",
-              showgrid: true,
+              showgrid: false,
               showline: false,
               showticklabels: true,
               tickformat: ",.2" + raw.yaxis_tickformat,
@@ -244,7 +248,10 @@
               "<b>%{x}</b>" +
               "<br>" +
               raw.annotation1 +
-              ": <b>%{y:$.2" +
+              ": <b>%{y:" +
+              symbol +
+              ".2" +
+              hover_round +
               raw.yaxis_tickformat +
               "}</b><extra></extra>",
             hoverlabel: {
@@ -278,8 +285,8 @@
           } else {
             // 2-line single axis
             primary_range = [
-              0.8 * Math.min(...raw.min_y),
-              1.2 * Math.max(...raw.max_y)
+              0.8 * Math.min(...raw.min_y) - 0.1,
+              1.15 * Math.max(...raw.max_y)
             ];
           }
           primary_yaxis_tickformat = ",.0" + raw.yaxis_tickformat;
@@ -298,6 +305,7 @@
               "<br>" +
               raw.annotation1 +
               ": <b>%{y:,.2" +
+              hover_round +
               raw.yaxis_tickformat +
               "}</b><extra></extra>",
             hoverlabel: {
@@ -344,7 +352,6 @@
             target == "container6"
           ) {
             // Annotations for graphs 1, 5 and 6
-            console.log(raw);
             let x = [];
             let y = [];
             let shift = [];
@@ -354,14 +361,14 @@
               shift.push(60, 30);
             }
             if (target == "container5") {
-              x.push(frames[n - 1].data[0].x[48], frames[n - 1].data[1].x[35]);
+              x.push(frames[n - 1].data[0].x[48], frames[n - 1].data[1].x[41]);
               y.push(frames[n - 1].data[0].y[48], frames[n - 1].data[1].y[48]);
               shift.push(-30, 45);
             }
             if (target == "container6") {
               x.push(frames[n - 1].data[0].x[29], frames[n - 1].data[1].x[25]);
               y.push(frames[n - 1].data[0].y[29], frames[n - 1].data[1].y[25]);
-              shift.push(90, -90);
+              shift.push(120, -120);
             }
             annotations.push({
               showarrow: false,
@@ -437,14 +444,14 @@
               }
             },
             hovermode: "closest",
+            margin: { t: 20 },
+            font: { family: "Merriweather Sans" },
             legend: {
-              xref: "paper",
-              yref: "paper",
-              x: 0.15,
+              x: 0.28,
               y: 0.5,
               font: {
                 family: "Merriweather Sans",
-                size: 12
+                size: 15
               }
             },
             annotations: annotations
