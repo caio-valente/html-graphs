@@ -40,7 +40,7 @@
 
 <!-- Place this code on the position for the graph 1 -->
 <div id="reach1"></div>
-<div style="min-height: 500px; max-width: 800px;" id="container1"></div>
+<div id="container1"></div>
 
 <!-- Beginning of JavaScript -->
 <script>
@@ -56,7 +56,9 @@
       if (entries[0].isIntersecting) {
         // Calls the function to get the data and plot the graph
         // Passes the target id of the reached div
-        fetch_json_and_plot(entries[0].target.id);
+        Plotly.d3.json(myurl1, (err, raw) =>
+          make_graph1(err, raw, "container1")
+        );
         observer1.unobserve(entries[0].target);
       }
     },
@@ -65,39 +67,7 @@
   // Puts an observer on each div to be reached
   observer1.observe(document.querySelector("#reach1"));
 
-  function fetch_json_and_plot(reached) {
-    // gets the json with Plotly.d3.json and
-    // calls make_graph with the correct target
-    if (reached == "reach1") {
-      Plotly.d3.json(myurl1, (err, raw) =>
-        make_graph(err, raw, "container1")
-      );
-    } else if (reached == "reach2") {
-      Plotly.d3.json(myurl2, (err, raw) =>
-        make_graph(err, raw, "container2")
-      );
-    } else if (reached == "reach3") {
-      Plotly.d3.json(myurl3, (err, raw) =>
-        make_graph(err, raw, "container3")
-      );
-    } else if (reached == "reach4") {
-      Plotly.d3.json(myurl4, (err, raw) =>
-        make_graph(err, raw, "container4")
-      );
-    } else if (reached == "reach5") {
-      Plotly.d3.json(myurl5, (err, raw) =>
-        make_graph(err, raw, "container5")
-      );
-    } else if (reached == "reach6") {
-      Plotly.d3.json(myurl6, (err, raw) =>
-        make_graph(err, raw, "container6")
-      );
-    } else {
-      return;
-    }
-  }
-
-  function make_graph(err, raw, target) {
+  function make_graph1(err, raw, target) {
     // takes data and target and generates the graph
     let layout = {  // Plotly figure layout
       paper_bgcolor: 'rgba(0,0,0,0)',
@@ -113,7 +83,6 @@
     let primary_range = []; // Primary Y Axis Range
     let primary_yaxis_tickformat; // Primary Y Axis Number formating
     let symbol = ""; // Y Axis symbol for currencies
-    let fill = null; // Fill below the line
     let dtick = ""; // Overrides automatic distance between X Axis ticks
 
     if (err !== null) {
@@ -138,149 +107,40 @@
       });
     }
 
-    // Specific config for each graph
-    if (target == "container1") {
-      layout = { ...layout, showlegend: false };
-    }
-    if (target == "container3") {
-      hover_round = "f";
-      symbol = "$";
-      fill = "tozeroy";
-    }
-    if (target == "container4") {
-      symbol = "";
-      dtick = 5;
-    }
-    if (target == "container5") {
-      layout = { ...layout, showlegend: false };
-    }
-    if (target == "container6") {
-      hover_round = "f";
-      percent = "%";
-      dtick = 5;
-      layout = { ...layout, showlegend: false };
-    }
+    layout = { ...layout, showlegend: false };
 
-    // If the graph is multiaxis, configure secondary Y Axis
-    if (raw.has_multiaxis) {
-      sec_yaxis = "y2";
-      primary_yaxis_color = "rgb(124,181,236)";
-      layout = {
-        ...layout,
-        yaxis2: {
-          range: [0.8 * raw.min_y[1], 1.15 * raw.max_y[1]],
-          overlaying: "y",
-          side: "right",
-          showgrid: false,
-          showline: false,
-          showticklabels: true,
-          tickformat: ",.2" + raw.yaxis_tickformat,
-          zeroline: false,
-          ticksuffix: percent,
-          tickfont: {
-            color: "rgb(225,225,225)",
-            family: "Merriweather Sans",
-            size: 15
-          }
-        }
-      };
-    } else {
-      // else keep all lines in axis "y"
-      sec_yaxis = "y";
-      primary_yaxis_color = "rgb(225,225,225)";
-    }
+    primary_yaxis_color = "rgb(225,225,225)";
 
-    // Config for graphs with 1 line
-    if (raw.y.length == 1) {
-      primary_yaxis_tickformat = symbol + ",.0" + raw.yaxis_tickformat;
-      primary_range = [0.8 * raw.min_y[0], 1.2 * raw.max_y[0]];
-      traces.push({
-        x: frames[1].data[0].x,
-        y: frames[1].data[0].y,
-        fill: fill,
-        name: raw.annotation1,
-        type: "scatter",
-        mode: "markers+lines",
-        marker: { size: 3 },
-        line: { color: "rgb(124,181,236)", width: 2.6 },
-        connectgaps: true,
-        hovertemplate:
-          "<b>%{x}</b>" +
-          "<br>" +
-          raw.annotation1 +
-          ": <b>%{y:" +
-          symbol +
-          ".2" +
-          hover_round +
-          raw.yaxis_tickformat +
-          "}</b><extra></extra>",
-        hoverlabel: {
-          bgcolor: "rgb(240,240,240)",
-          bordercolor: "rgb(124,181,236)",
-          font: {
-            color: "black",
-            family: "Merriweather Sans"
-          }
-        }
-      });
-      annotations.push({
-        showarrow: false,
-        text: "<b>" + raw.annotation1 + "</b>",
+    // 2-line single axis
+    primary_range = [
+      0.8 * Math.min(...raw.min_y) - 0.03,
+      1.15 * Math.max(...raw.max_y)
+    ];
+    primary_yaxis_tickformat = ",.0" + raw.yaxis_tickformat;
+    traces.push({
+      // First line
+      x: frames[1].data[0].x,
+      y: frames[1].data[0].y,
+      name: raw.annotation1,
+      type: "scatter",
+      mode: "markers+lines",
+      marker: { size: 3 },
+      line: { color: "rgb(124,181,236)", width: 2.6 },
+      connectgaps: true,
+      hovertemplate:
+        "<b>%{x}</b>" +
+        "<br>" +
+        raw.annotation1 +
+        ": <b>%{y:,.2" +
+        hover_round +
+        raw.yaxis_tickformat +
+        "}</b><extra></extra>",
+      hoverlabel: {
+        bgcolor: "rgb(240,240,240)",
+        bordercolor: "rgb(124,181,236)",
         font: {
-          family: "Merriweather Sans",
-          size: 16,
-          color: "rgb(124,181,236)"
-        },
-        xref: "x",
-        yref: "y",
-        x: frames[n - 1].data[0].x[n - 1],
-        y: frames[n - 1].data[0].y[n - 1],
-        yshift: 30
-      });
-    } else if (raw.y.length == 2) {
-      // Config for graphs with 2 lines
-      if (raw.has_multiaxis) {
-        // 2-line multiaxis
-        primary_range = [0.8 * raw.min_y[0], 1.2 * raw.max_y[0]];
-      } else {
-        // 2-line single axis
-        if (target == 'container1') {
-          primary_range = [
-            0.8 * Math.min(...raw.min_y) - 0.03,
-            1.15 * Math.max(...raw.max_y)
-          ];
-        } else {
-          primary_range = [
-            0.8 * Math.min(...raw.min_y) - 0.1,
-            1.15 * Math.max(...raw.max_y)
-          ];
-        }
-      }
-      primary_yaxis_tickformat = ",.0" + raw.yaxis_tickformat;
-      traces.push({
-        // First line
-        x: frames[1].data[0].x,
-        y: frames[1].data[0].y,
-        name: raw.annotation1,
-        type: "scatter",
-        mode: "markers+lines",
-        marker: { size: 3 },
-        line: { color: "rgb(124,181,236)", width: 2.6 },
-        connectgaps: true,
-        hovertemplate:
-          "<b>%{x}</b>" +
-          "<br>" +
-          raw.annotation1 +
-          ": <b>%{y:,.2" +
-          hover_round +
-          raw.yaxis_tickformat +
-          "}</b><extra></extra>",
-        hoverlabel: {
-          bgcolor: "rgb(240,240,240)",
-          bordercolor: "rgb(124,181,236)",
-          font: {
-            color: "black",
-            family: "Merriweather Sans"
+          color: "black",
+          family: "Merriweather Sans"
           }
         }
       });
@@ -288,7 +148,6 @@
         // Second line
         x: frames[1].data[1].x,
         y: frames[1].data[1].y,
-        yaxis: sec_yaxis,
         name: raw.annotation2,
         type: "scatter",
         mode: "markers+lines",
@@ -313,30 +172,14 @@
           }
         }
       });
-      if (
-        target == "container1" ||
-        target == "container5" ||
-        target == "container6"
-      ) {
-        // Annotations for graphs 1, 5 and 6
         let x = [];
         let y = [];
         let shift = [];
-        if (target == "container1") {
-          x.push(frames[n - 1].data[0].x[12], frames[n - 1].data[1].x[12]);
-          y.push(frames[n - 1].data[0].y[12], frames[n - 1].data[1].y[12]);
-          shift.push(60, 30);
-        }
-        if (target == "container5") {
-          x.push(frames[n - 1].data[0].x[48], frames[n - 1].data[1].x[41]);
-          y.push(frames[n - 1].data[0].y[48], frames[n - 1].data[1].y[48]);
-          shift.push(-30, 45);
-        }
-        if (target == "container6") {
-          x.push(frames[n - 1].data[0].x[29], frames[n - 1].data[1].x[25]);
-          y.push(frames[n - 1].data[0].y[29], frames[n - 1].data[1].y[25]);
-          shift.push(120, -120);
-        }
+
+        x.push(frames[n - 1].data[0].x[12], frames[n - 1].data[1].x[12]);
+        y.push(frames[n - 1].data[0].y[12], frames[n - 1].data[1].y[12]);
+        shift.push(60, 30);
+
         annotations.push({
           showarrow: false,
           text: "<b>" + raw.annotation1 + "</b>",
@@ -360,16 +203,11 @@
             color: "rgb(225,225,225)"
           },
           xref: "x",
-          yref: sec_yaxis,
+          yref: "y",
           x: x[1],
           y: y[1],
           yshift: shift[1]
         });
-      } else if (target == "container2") {
-        // No annotations for graph 2
-        annotations = [];
-      }
-    }
     Plotly.plot(
       // Plotly function to generate graph
       target, // Div id to plot to
@@ -445,11 +283,7 @@
   }
 </script>
 
-
-    <!-- Spacer for testing -->
-    <div class="spacer">
-      Scroll below to activate graph. 
-    </div>
+    <div class="spacer"></div>
 
     <!-- Include Plotly.js -->
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -462,7 +296,7 @@
 
 <!-- Place this code on the position for the graph 2 -->
 <div id="reach2"></div>
-<div style="min-height: 500px; max-width: 800px;" id="container2"></div>
+<div id="container2"></div>
 
 <!-- Beginning of JavaScript -->
 <script>
@@ -478,7 +312,9 @@
       if (entries[0].isIntersecting) {
         // Calls the function to get the data and plot the graph
         // Passes the target id of the reached div
-        fetch_json_and_plot(entries[0].target.id);
+        Plotly.d3.json(myurl2, (err, raw) =>
+          make_graph2(err, raw, "container2")
+        );
         observer2.unobserve(entries[0].target);
       }
     },
@@ -487,39 +323,7 @@
   // Puts an observer on each div to be reached
   observer2.observe(document.querySelector("#reach2"));
 
-  function fetch_json_and_plot(reached) {
-    // gets the json with Plotly.d3.json and
-    // calls make_graph with the correct target
-    if (reached == "reach1") {
-      Plotly.d3.json(myurl1, (err, raw) =>
-        make_graph(err, raw, "container1")
-      );
-    } else if (reached == "reach2") {
-      Plotly.d3.json(myurl2, (err, raw) =>
-        make_graph(err, raw, "container2")
-      );
-    } else if (reached == "reach3") {
-      Plotly.d3.json(myurl3, (err, raw) =>
-        make_graph(err, raw, "container3")
-      );
-    } else if (reached == "reach4") {
-      Plotly.d3.json(myurl4, (err, raw) =>
-        make_graph(err, raw, "container4")
-      );
-    } else if (reached == "reach5") {
-      Plotly.d3.json(myurl5, (err, raw) =>
-        make_graph(err, raw, "container5")
-      );
-    } else if (reached == "reach6") {
-      Plotly.d3.json(myurl6, (err, raw) =>
-        make_graph(err, raw, "container6")
-      );
-    } else {
-      return;
-    }
-  }
-
-  function make_graph(err, raw, target) {
+  function make_graph2(err, raw, target) {
     // takes data and target and generates the graph
     let layout = {  // Plotly figure layout
       paper_bgcolor: 'rgba(0,0,0,0)',
@@ -535,7 +339,6 @@
     let primary_range = []; // Primary Y Axis Range
     let primary_yaxis_tickformat; // Primary Y Axis Number formating
     let symbol = ""; // Y Axis symbol for currencies
-    let fill = null; // Fill below the line
     let dtick = ""; // Overrides automatic distance between X Axis ticks
 
     if (err !== null) {
@@ -560,31 +363,8 @@
       });
     }
 
-    // Specific config for each graph
-    if (target == "container1") {
-      layout = { ...layout, showlegend: false };
-    }
-    if (target == "container3") {
-      hover_round = "f";
-      symbol = "$";
-      fill = "tozeroy";
-    }
-    if (target == "container4") {
-      symbol = "";
-      dtick = 5;
-    }
-    if (target == "container5") {
-      layout = { ...layout, showlegend: false };
-    }
-    if (target == "container6") {
-      hover_round = "f";
-      percent = "%";
-      dtick = 5;
-      layout = { ...layout, showlegend: false };
-    }
-
-    // If the graph is multiaxis, configure secondary Y Axis
-    if (raw.has_multiaxis) {
+      primary_range = [0.8 * raw.min_y[0], 1.2 * raw.max_y[0]];
+      primary_yaxis_tickformat = ",.0" + raw.yaxis_tickformat;
       sec_yaxis = "y2";
       primary_yaxis_color = "rgb(124,181,236)";
       layout = {
@@ -606,83 +386,13 @@
           }
         }
       };
-    } else {
-      // else keep all lines in axis "y"
-      sec_yaxis = "y";
-      primary_yaxis_color = "rgb(225,225,225)";
-    }
 
-    // Config for graphs with 1 line
-    if (raw.y.length == 1) {
-      primary_yaxis_tickformat = symbol + ",.0" + raw.yaxis_tickformat;
-      primary_range = [0.8 * raw.min_y[0], 1.2 * raw.max_y[0]];
-      traces.push({
-        x: frames[1].data[0].x,
-        y: frames[1].data[0].y,
-        fill: fill,
-        name: raw.annotation1,
-        type: "scatter",
-        mode: "markers+lines",
-        marker: { size: 3 },
-        line: { color: "rgb(124,181,236)", width: 2.6 },
-        connectgaps: true,
-        hovertemplate:
-          "<b>%{x}</b>" +
-          "<br>" +
-          raw.annotation1 +
-          ": <b>%{y:" +
-          symbol +
-          ".2" +
-          hover_round +
-          raw.yaxis_tickformat +
-          "}</b><extra></extra>",
-        hoverlabel: {
-          bgcolor: "rgb(240,240,240)",
-          bordercolor: "rgb(124,181,236)",
-          font: {
-            color: "black",
-            family: "Merriweather Sans"
-          }
-        }
-      });
-      annotations.push({
-        showarrow: false,
-        text: "<b>" + raw.annotation1 + "</b>",
-        font: {
-          family: "Merriweather Sans",
-          size: 16,
-          color: "rgb(124,181,236)"
-        },
-        xref: "x",
-        yref: "y",
-        x: frames[n - 1].data[0].x[n - 1],
-        y: frames[n - 1].data[0].y[n - 1],
-        yshift: 30
-      });
-    } else if (raw.y.length == 2) {
-      // Config for graphs with 2 lines
-      if (raw.has_multiaxis) {
-        // 2-line multiaxis
-        primary_range = [0.8 * raw.min_y[0], 1.2 * raw.max_y[0]];
-      } else {
-        // 2-line single axis
-        if (target == 'container1') {
-          primary_range = [
-            0.8 * Math.min(...raw.min_y) - 0.03,
-            1.15 * Math.max(...raw.max_y)
-          ];
-        } else {
-          primary_range = [
-            0.8 * Math.min(...raw.min_y) - 0.1,
-            1.15 * Math.max(...raw.max_y)
-          ];
-        }
-      }
-      primary_yaxis_tickformat = ",.0" + raw.yaxis_tickformat;
+
       traces.push({
         // First line
         x: frames[1].data[0].x,
         y: frames[1].data[0].y,
+        showlegend: false,
         name: raw.annotation1,
         type: "scatter",
         mode: "markers+lines",
@@ -710,6 +420,7 @@
         // Second line
         x: frames[1].data[1].x,
         y: frames[1].data[1].y,
+        showlegend: false,
         yaxis: sec_yaxis,
         name: raw.annotation2+'           ',
         type: "scatter",
@@ -735,63 +446,42 @@
           }
         }
       });
-      if (
-        target == "container1" ||
-        target == "container5" ||
-        target == "container6"
-      ) {
-        // Annotations for graphs 1, 5 and 6
-        let x = [];
-        let y = [];
-        let shift = [];
-        if (target == "container1") {
-          x.push(frames[n - 1].data[0].x[12], frames[n - 1].data[1].x[12]);
-          y.push(frames[n - 1].data[0].y[12], frames[n - 1].data[1].y[12]);
-          shift.push(60, 30);
-        }
-        if (target == "container5") {
-          x.push(frames[n - 1].data[0].x[48], frames[n - 1].data[1].x[41]);
-          y.push(frames[n - 1].data[0].y[48], frames[n - 1].data[1].y[48]);
-          shift.push(-30, 45);
-        }
-        if (target == "container6") {
-          x.push(frames[n - 1].data[0].x[29], frames[n - 1].data[1].x[25]);
-          y.push(frames[n - 1].data[0].y[29], frames[n - 1].data[1].y[25]);
-          shift.push(120, -120);
-        }
-        annotations.push({
-          showarrow: false,
-          text: "<b>" + raw.annotation1 + "</b>",
-          font: {
-            family: "Merriweather Sans",
-            size: 16,
-            color: "rgb(124,181,236)"
-          },
-          xref: "x",
-          yref: "y",
-          x: x[0],
-          y: y[0],
-          yshift: shift[0]
-        });
-        annotations.push({
-          showarrow: false,
-          text: "<b>" + raw.annotation2 + "</b>",
-          font: {
-            family: "Merriweather Sans",
-            size: 16,
-            color: "rgb(225,225,225)"
-          },
-          xref: "x",
-          yref: sec_yaxis,
-          x: x[1],
-          y: y[1],
-          yshift: shift[1]
-        });
-      } else if (target == "container2") {
-        // No annotations for graph 2
-        annotations = [];
-      }
-    }
+      let x = [];
+      let y = [];
+      let shift = [];
+
+      x.push(frames[n - 1].data[0].x[25], frames[n - 1].data[1].x[46]);
+      y.push(frames[n - 1].data[0].y[38], frames[n - 1].data[1].y[46]);
+      shift.push(80, -60);
+
+      annotations.push({
+        showarrow: false,
+        text: "<b>" + raw.annotation1 + "</b>",
+        font: {
+          family: "Merriweather Sans",
+          size: 16,
+          color: "rgb(124,181,236)"
+        },
+        xref: "x",
+        yref: "y",
+        x: x[0],
+        y: y[0],
+        yshift: shift[0]
+      });
+      annotations.push({
+        showarrow: false,
+        text: "<b>" + raw.annotation2 + "</b>",
+        font: {
+          family: "Merriweather Sans",
+          size: 16,
+          color: "rgb(225,225,225)"
+        },
+        xref: "x",
+        yref: sec_yaxis,
+        x: x[1],
+        y: y[1],
+        yshift: shift[1]
+      });
     Plotly.plot(
       // Plotly function to generate graph
       target, // Div id to plot to
@@ -868,11 +558,8 @@
   }
 </script>
 
-    <!-- Spacer for testing -->
-    <div class="spacer">
-      Scroll below to activate graph.
-    </div>
-
+    <div class="spacer"></div>
+    
    <!-- Include Plotly.js -->
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <!-- Include Merriweather Sans Font -->
@@ -884,7 +571,7 @@
 
 <!-- Place this code on the position for the graph 3 -->
 <div id="reach3"></div>
-<div style="min-height: 500px; max-width: 800px;" id="container3"></div>
+<div id="container3"></div>
 
 <!-- Beginning of JavaScript -->
 <script>
@@ -900,7 +587,9 @@
       if (entries[0].isIntersecting) {
         // Calls the function to get the data and plot the graph
         // Passes the target id of the reached div
-        fetch_json_and_plot(entries[0].target.id);
+        Plotly.d3.json(myurl3, (err, raw) =>
+          make_graph3(err, raw, "container3")
+        );
         observer3.unobserve(entries[0].target);
       }
     },
@@ -909,39 +598,7 @@
   // Puts an observer on each div to be reached
   observer3.observe(document.querySelector("#reach3"));
 
-  function fetch_json_and_plot(reached) {
-    // gets the json with Plotly.d3.json and
-    // calls make_graph with the correct target
-    if (reached == "reach1") {
-      Plotly.d3.json(myurl1, (err, raw) =>
-        make_graph(err, raw, "container1")
-      );
-    } else if (reached == "reach2") {
-      Plotly.d3.json(myurl2, (err, raw) =>
-        make_graph(err, raw, "container2")
-      );
-    } else if (reached == "reach3") {
-      Plotly.d3.json(myurl3, (err, raw) =>
-        make_graph(err, raw, "container3")
-      );
-    } else if (reached == "reach4") {
-      Plotly.d3.json(myurl4, (err, raw) =>
-        make_graph(err, raw, "container4")
-      );
-    } else if (reached == "reach5") {
-      Plotly.d3.json(myurl5, (err, raw) =>
-        make_graph(err, raw, "container5")
-      );
-    } else if (reached == "reach6") {
-      Plotly.d3.json(myurl6, (err, raw) =>
-        make_graph(err, raw, "container6")
-      );
-    } else {
-      return;
-    }
-  }
-
-  function make_graph(err, raw, target) {
+  function make_graph3(err, raw, target) {
     // takes data and target and generates the graph
     let layout = {  // Plotly figure layout
       paper_bgcolor: 'rgba(0,0,0,0)',
@@ -957,7 +614,6 @@
     let primary_range = []; // Primary Y Axis Range
     let primary_yaxis_tickformat; // Primary Y Axis Number formating
     let symbol = ""; // Y Axis symbol for currencies
-    let fill = null; // Fill below the line
     let dtick = ""; // Overrides automatic distance between X Axis ticks
 
     if (err !== null) {
@@ -982,238 +638,41 @@
       });
     }
 
-    // Specific config for each graph
-    if (target == "container1") {
-      layout = { ...layout, showlegend: false };
-    }
-    if (target == "container3") {
-      hover_round = "f";
-      symbol = "$";
-      fill = "tozeroy";
-    }
-    if (target == "container4") {
-      symbol = "";
-      dtick = 5;
-    }
-    if (target == "container5") {
-      layout = { ...layout, showlegend: false };
-    }
-    if (target == "container6") {
-      hover_round = "f";
-      percent = "%";
-      dtick = 5;
-      layout = { ...layout, showlegend: false };
-    }
+    hover_round = "f";
+    symbol = "$";
+    primary_yaxis_color = "rgb(225,225,225)";
+    primary_yaxis_tickformat = symbol + ",.0" + raw.yaxis_tickformat;
+    primary_range = [0.8 * raw.min_y[0], 1.2 * raw.max_y[0]];
 
-    // If the graph is multiaxis, configure secondary Y Axis
-    if (raw.has_multiaxis) {
-      sec_yaxis = "y2";
-      primary_yaxis_color = "rgb(124,181,236)";
-      layout = {
-        ...layout,
-        yaxis2: {
-          range: [0.8 * raw.min_y[1], 1.15 * raw.max_y[1]],
-          overlaying: "y",
-          side: "right",
-          showgrid: false,
-          showline: false,
-          showticklabels: true,
-          tickformat: ",.2" + raw.yaxis_tickformat,
-          zeroline: false,
-          ticksuffix: percent,
-          tickfont: {
-            color: "rgb(225,225,225)",
-            family: "Merriweather Sans",
-            size: 15
-          }
-        }
-      };
-    } else {
-      // else keep all lines in axis "y"
-      sec_yaxis = "y";
-      primary_yaxis_color = "rgb(225,225,225)";
-    }
-
-    // Config for graphs with 1 line
-    if (raw.y.length == 1) {
-      primary_yaxis_tickformat = symbol + ",.0" + raw.yaxis_tickformat;
-      primary_range = [0.8 * raw.min_y[0], 1.2 * raw.max_y[0]];
-      traces.push({
-        x: frames[1].data[0].x,
-        y: frames[1].data[0].y,
-        fill: fill,
-        name: raw.annotation1,
-        type: "scatter",
-        mode: "markers+lines",
-        marker: { size: 3 },
-        line: { color: "rgb(124,181,236)", width: 2.6 },
-        connectgaps: true,
-        hovertemplate:
-          "<b>%{x}</b>" +
-          "<br>" +
-          raw.annotation1 +
-          ": <b>%{y:" +
-          symbol +
-          ".2" +
-          hover_round +
-          raw.yaxis_tickformat +
-          "}</b><extra></extra>",
-        hoverlabel: {
-          bgcolor: "rgb(240,240,240)",
-          bordercolor: "rgb(124,181,236)",
-          font: {
-            color: "black",
-            family: "Merriweather Sans"
-          }
-        }
-      });
-      annotations.push({
-        showarrow: false,
-        text: "<b>" + raw.annotation1 + "</b>",
+    traces.push({
+      x: frames[1].data[0].x,
+      y: frames[1].data[0].y,
+      fill: "tozeroy",
+      name: raw.annotation1,
+      type: "scatter",
+      mode: "markers+lines",
+      marker: { size: 3 },
+      line: { color: "rgb(124,181,236)", width: 2.6 },
+      connectgaps: true,
+      hovertemplate:
+        "<b>%{x}</b>" +
+        "<br>" +
+        raw.annotation1 +
+        ": <b>%{y:" +
+        symbol +
+        ".2" +
+        hover_round +
+        raw.yaxis_tickformat +
+        "}</b><extra></extra>",
+      hoverlabel: {
+        bgcolor: "rgb(240,240,240)",
+        bordercolor: "rgb(124,181,236)",
         font: {
-          family: "Merriweather Sans",
-          size: 16,
-          color: "rgb(124,181,236)"
-        },
-        xref: "x",
-        yref: "y",
-        x: frames[n - 1].data[0].x[n - 1],
-        y: frames[n - 1].data[0].y[n - 1],
-        yshift: 30
-      });
-    } else if (raw.y.length == 2) {
-      // Config for graphs with 2 lines
-      if (raw.has_multiaxis) {
-        // 2-line multiaxis
-        primary_range = [0.8 * raw.min_y[0], 1.2 * raw.max_y[0]];
-      } else {
-        // 2-line single axis
-        if (target == 'container1') {
-          primary_range = [
-            0.8 * Math.min(...raw.min_y) - 0.03,
-            1.15 * Math.max(...raw.max_y)
-          ];
-        } else {
-          primary_range = [
-            0.8 * Math.min(...raw.min_y) - 0.1,
-            1.15 * Math.max(...raw.max_y)
-          ];
-        }
-      }
-      primary_yaxis_tickformat = ",.0" + raw.yaxis_tickformat;
-      traces.push({
-        // First line
-        x: frames[1].data[0].x,
-        y: frames[1].data[0].y,
-        name: raw.annotation1,
-        type: "scatter",
-        mode: "markers+lines",
-        marker: { size: 3 },
-        line: { color: "rgb(124,181,236)", width: 2.6 },
-        connectgaps: true,
-        hovertemplate:
-          "<b>%{x}</b>" +
-          "<br>" +
-          raw.annotation1 +
-          ": <b>%{y:,.2" +
-          hover_round +
-          raw.yaxis_tickformat +
-          "}</b><extra></extra>",
-        hoverlabel: {
-          bgcolor: "rgb(240,240,240)",
-          bordercolor: "rgb(124,181,236)",
-          font: {
-            color: "black",
-            family: "Merriweather Sans"
+          color: "black",
+          family: "Merriweather Sans"
           }
         }
       });
-      traces.push({
-        // Second line
-        x: frames[1].data[1].x,
-        y: frames[1].data[1].y,
-        yaxis: sec_yaxis,
-        name: raw.annotation2,
-        type: "scatter",
-        mode: "markers+lines",
-        marker: { size: 3 },
-        line: { color: "rgb(225,225,225)", width: 2.6 },
-        connectgaps: true,
-        hovertemplate:
-          "<b>%{x}</b>" +
-          "<br>" +
-          raw.annotation2 +
-          ": <b>%{y:,.2" +
-          raw.yaxis_tickformat +
-          "}" +
-          percent +
-          "</b><extra></extra>",
-        hoverlabel: {
-          bgcolor: "rgb(240,240,240)",
-          bordercolor: "rgb(225,225,225)",
-          font: {
-            color: "black",
-            family: "Merriweather Sans"
-          }
-        }
-      });
-      if (
-        target == "container1" ||
-        target == "container5" ||
-        target == "container6"
-      ) {
-        // Annotations for graphs 1, 5 and 6
-        let x = [];
-        let y = [];
-        let shift = [];
-        if (target == "container1") {
-          x.push(frames[n - 1].data[0].x[12], frames[n - 1].data[1].x[12]);
-          y.push(frames[n - 1].data[0].y[12], frames[n - 1].data[1].y[12]);
-          shift.push(60, 30);
-        }
-        if (target == "container5") {
-          x.push(frames[n - 1].data[0].x[48], frames[n - 1].data[1].x[41]);
-          y.push(frames[n - 1].data[0].y[48], frames[n - 1].data[1].y[48]);
-          shift.push(-30, 45);
-        }
-        if (target == "container6") {
-          x.push(frames[n - 1].data[0].x[29], frames[n - 1].data[1].x[25]);
-          y.push(frames[n - 1].data[0].y[29], frames[n - 1].data[1].y[25]);
-          shift.push(120, -120);
-        }
-        annotations.push({
-          showarrow: false,
-          text: "<b>" + raw.annotation1 + "</b>",
-          font: {
-            family: "Merriweather Sans",
-            size: 16,
-            color: "rgb(124,181,236)"
-          },
-          xref: "x",
-          yref: "y",
-          x: x[0],
-          y: y[0],
-          yshift: shift[0]
-        });
-        annotations.push({
-          showarrow: false,
-          text: "<b>" + raw.annotation2 + "</b>",
-          font: {
-            family: "Merriweather Sans",
-            size: 16,
-            color: "rgb(225,225,225)"
-          },
-          xref: "x",
-          yref: sec_yaxis,
-          x: x[1],
-          y: y[1],
-          yshift: shift[1]
-        });
-      } else if (target == "container2") {
-        // No annotations for graph 2
-        annotations = [];
-      }
-    }
     Plotly.plot(
       // Plotly function to generate graph
       target, // Div id to plot to
@@ -1288,13 +747,7 @@
     });
   }
 </script>
-
-
-    <!-- Spacer for testing -->
-    <div class="spacer">
-      Scroll below to activate graph.
-    </div>
-
+    <div class="spacer"></div>
     <!-- Include Plotly.js -->
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <!-- Include Merriweather Sans Font -->
@@ -1322,7 +775,9 @@
       if (entries[0].isIntersecting) {
         // Calls the function to get the data and plot the graph
         // Passes the target id of the reached div
-        fetch_json_and_plot(entries[0].target.id);
+        Plotly.d3.json(myurl4, (err, raw) =>
+          make_graph4(err, raw, "container4")
+        );
         observer4.unobserve(entries[0].target);
       }
     },
@@ -1331,39 +786,8 @@
   // Puts an observer on each div to be reached
   observer4.observe(document.querySelector("#reach4"));
 
-  function fetch_json_and_plot(reached) {
-    // gets the json with Plotly.d3.json and
-    // calls make_graph with the correct target
-    if (reached == "reach1") {
-      Plotly.d3.json(myurl1, (err, raw) =>
-        make_graph(err, raw, "container1")
-      );
-    } else if (reached == "reach2") {
-      Plotly.d3.json(myurl2, (err, raw) =>
-        make_graph(err, raw, "container2")
-      );
-    } else if (reached == "reach3") {
-      Plotly.d3.json(myurl3, (err, raw) =>
-        make_graph(err, raw, "container3")
-      );
-    } else if (reached == "reach4") {
-      Plotly.d3.json(myurl4, (err, raw) =>
-        make_graph(err, raw, "container4")
-      );
-    } else if (reached == "reach5") {
-      Plotly.d3.json(myurl5, (err, raw) =>
-        make_graph(err, raw, "container5")
-      );
-    } else if (reached == "reach6") {
-      Plotly.d3.json(myurl6, (err, raw) =>
-        make_graph(err, raw, "container6")
-      );
-    } else {
-      return;
-    }
-  }
 
-  function make_graph(err, raw, target) {
+  function make_graph4(err, raw, target) {
     // takes data and target and generates the graph
     let layout = {  // Plotly figure layout
       paper_bgcolor: 'rgba(0,0,0,0)',
@@ -1379,7 +803,6 @@
     let primary_range = []; // Primary Y Axis Range
     let primary_yaxis_tickformat; // Primary Y Axis Number formating
     let symbol = ""; // Y Axis symbol for currencies
-    let fill = null; // Fill below the line
     let dtick = ""; // Overrides automatic distance between X Axis ticks
 
     if (err !== null) {
@@ -1404,238 +827,40 @@
       });
     }
 
-    // Specific config for each graph
-    if (target == "container1") {
-      layout = { ...layout, showlegend: false };
-    }
-    if (target == "container3") {
-      hover_round = "f";
-      symbol = "$";
-      fill = "tozeroy";
-    }
-    if (target == "container4") {
-      symbol = "";
-      dtick = 5;
-    }
-    if (target == "container5") {
-      layout = { ...layout, showlegend: false };
-    }
-    if (target == "container6") {
-      hover_round = "f";
-      percent = "%";
-      dtick = 5;
-      layout = { ...layout, showlegend: false };
-    }
-
-    // If the graph is multiaxis, configure secondary Y Axis
-    if (raw.has_multiaxis) {
-      sec_yaxis = "y2";
-      primary_yaxis_color = "rgb(124,181,236)";
-      layout = {
-        ...layout,
-        yaxis2: {
-          range: [0.8 * raw.min_y[1], 1.15 * raw.max_y[1]],
-          overlaying: "y",
-          side: "right",
-          showgrid: false,
-          showline: false,
-          showticklabels: true,
-          tickformat: ",.2" + raw.yaxis_tickformat,
-          zeroline: false,
-          ticksuffix: percent,
-          tickfont: {
-            color: "rgb(225,225,225)",
-            family: "Merriweather Sans",
-            size: 15
-          }
-        }
-      };
-    } else {
-      // else keep all lines in axis "y"
-      sec_yaxis = "y";
-      primary_yaxis_color = "rgb(225,225,225)";
-    }
-
-    // Config for graphs with 1 line
-    if (raw.y.length == 1) {
-      primary_yaxis_tickformat = symbol + ",.0" + raw.yaxis_tickformat;
-      primary_range = [0.75 * raw.min_y[0], 1.2 * raw.max_y[0]];
-      traces.push({
-        x: frames[1].data[0].x,
-        y: frames[1].data[0].y,
-        fill: fill,
-        name: raw.annotation1,
-        type: "scatter",
-        mode: "markers+lines",
-        marker: { size: 3 },
-        line: { color: "rgb(124,181,236)", width: 2.6 },
-        connectgaps: true,
-        hovertemplate:
-          "<b>%{x}</b>" +
-          "<br>" +
-          raw.annotation1 +
-          ": <b>%{y:" +
-          symbol +
-          ".2" +
-          hover_round +
-          raw.yaxis_tickformat +
-          "}</b><extra></extra>",
-        hoverlabel: {
-          bgcolor: "rgb(240,240,240)",
-          bordercolor: "rgb(124,181,236)",
-          font: {
-            color: "black",
-            family: "Merriweather Sans"
-          }
-        }
-      });
-      annotations.push({
-        showarrow: false,
-        text: "<b>" + raw.annotation1 + "</b>",
+    symbol = "";
+    dtick = 5;
+    primary_yaxis_color = "rgb(225,225,225)";
+    primary_yaxis_tickformat = symbol + ",.0" + raw.yaxis_tickformat;
+    primary_range = [0.75 * raw.min_y[0], 1.2 * raw.max_y[0]];
+    traces.push({
+      x: frames[1].data[0].x,
+      y: frames[1].data[0].y,
+      name: raw.annotation1,
+      type: "scatter",
+      mode: "markers+lines",
+      marker: { size: 3 },
+      line: { color: "rgb(124,181,236)", width: 2.6 },
+      connectgaps: true,
+      hovertemplate:
+        "<b>%{x}</b>" +
+        "<br>" +
+        raw.annotation1 +
+        ": <b>%{y:" +
+        symbol +
+        ".2" +
+        hover_round +
+        raw.yaxis_tickformat +
+        "}</b><extra></extra>",
+      hoverlabel: {
+        bgcolor: "rgb(240,240,240)",
+        bordercolor: "rgb(124,181,236)",
         font: {
-          family: "Merriweather Sans",
-          size: 16,
-          color: "rgb(124,181,236)"
-        },
-        xref: "x",
-        yref: "y",
-        x: frames[n - 1].data[0].x[n - 1],
-        y: frames[n - 1].data[0].y[n - 1],
-        yshift: 30
-      });
-    } else if (raw.y.length == 2) {
-      // Config for graphs with 2 lines
-      if (raw.has_multiaxis) {
-        // 2-line multiaxis
-        primary_range = [0.8 * raw.min_y[0], 1.2 * raw.max_y[0]];
-      } else {
-        // 2-line single axis
-        if (target == 'container1') {
-          primary_range = [
-            0.8 * Math.min(...raw.min_y) - 0.03,
-            1.15 * Math.max(...raw.max_y)
-          ];
-        } else {
-          primary_range = [
-            0.8 * Math.min(...raw.min_y) - 0.1,
-            1.15 * Math.max(...raw.max_y)
-          ];
+          color: "black",
+          family: "Merriweather Sans"
         }
       }
-      primary_yaxis_tickformat = ",.0" + raw.yaxis_tickformat;
-      traces.push({
-        // First line
-        x: frames[1].data[0].x,
-        y: frames[1].data[0].y,
-        name: raw.annotation1,
-        type: "scatter",
-        mode: "markers+lines",
-        marker: { size: 3 },
-        line: { color: "rgb(124,181,236)", width: 2.6 },
-        connectgaps: true,
-        hovertemplate:
-          "<b>%{x}</b>" +
-          "<br>" +
-          raw.annotation1 +
-          ": <b>%{y:,.2" +
-          hover_round +
-          raw.yaxis_tickformat +
-          "}</b><extra></extra>",
-        hoverlabel: {
-          bgcolor: "rgb(240,240,240)",
-          bordercolor: "rgb(124,181,236)",
-          font: {
-            color: "black",
-            family: "Merriweather Sans"
-          }
-        }
-      });
-      traces.push({
-        // Second line
-        x: frames[1].data[1].x,
-        y: frames[1].data[1].y,
-        yaxis: sec_yaxis,
-        name: raw.annotation2,
-        type: "scatter",
-        mode: "markers+lines",
-        marker: { size: 3 },
-        line: { color: "rgb(225,225,225)", width: 2.6 },
-        connectgaps: true,
-        hovertemplate:
-          "<b>%{x}</b>" +
-          "<br>" +
-          raw.annotation2 +
-          ": <b>%{y:,.2" +
-          raw.yaxis_tickformat +
-          "}" +
-          percent +
-          "</b><extra></extra>",
-        hoverlabel: {
-          bgcolor: "rgb(240,240,240)",
-          bordercolor: "rgb(225,225,225)",
-          font: {
-            color: "black",
-            family: "Merriweather Sans"
-          }
-        }
-      });
-      if (
-        target == "container1" ||
-        target == "container5" ||
-        target == "container6"
-      ) {
-        // Annotations for graphs 1, 5 and 6
-        let x = [];
-        let y = [];
-        let shift = [];
-        if (target == "container1") {
-          x.push(frames[n - 1].data[0].x[12], frames[n - 1].data[1].x[12]);
-          y.push(frames[n - 1].data[0].y[12], frames[n - 1].data[1].y[12]);
-          shift.push(60, 30);
-        }
-        if (target == "container5") {
-          x.push(frames[n - 1].data[0].x[48], frames[n - 1].data[1].x[41]);
-          y.push(frames[n - 1].data[0].y[48], frames[n - 1].data[1].y[48]);
-          shift.push(-30, 45);
-        }
-        if (target == "container6") {
-          x.push(frames[n - 1].data[0].x[29], frames[n - 1].data[1].x[25]);
-          y.push(frames[n - 1].data[0].y[29], frames[n - 1].data[1].y[25]);
-          shift.push(120, -120);
-        }
-        annotations.push({
-          showarrow: false,
-          text: "<b>" + raw.annotation1 + "</b>",
-          font: {
-            family: "Merriweather Sans",
-            size: 16,
-            color: "rgb(124,181,236)"
-          },
-          xref: "x",
-          yref: "y",
-          x: x[0],
-          y: y[0],
-          yshift: shift[0]
-        });
-        annotations.push({
-          showarrow: false,
-          text: "<b>" + raw.annotation2 + "</b>",
-          font: {
-            family: "Merriweather Sans",
-            size: 16,
-            color: "rgb(225,225,225)"
-          },
-          xref: "x",
-          yref: sec_yaxis,
-          x: x[1],
-          y: y[1],
-          yshift: shift[1]
-        });
-      } else if (target == "container2") {
-        // No annotations for graph 2
-        annotations = [];
-      }
-    }
+    });
+
     Plotly.plot(
       // Plotly function to generate graph
       target, // Div id to plot to
@@ -1710,13 +935,7 @@
     });
   }
 </script>
-
-
-    <!-- Spacer for testing -->
-    <div class="spacer">
-      Scroll below to activate graph.
-    </div>
-
+<div class="spacer"></div>
     <!-- Include Plotly.js -->
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <!-- Include Merriweather Sans Font -->
@@ -1744,7 +963,9 @@
       if (entries[0].isIntersecting) {
         // Calls the function to get the data and plot the graph
         // Passes the target id of the reached div
-        fetch_json_and_plot(entries[0].target.id);
+        Plotly.d3.json(myurl5, (err, raw) =>
+          make_graph5(err, raw, "container5")
+        );
         observer5.unobserve(entries[0].target);
       }
     },
@@ -1753,39 +974,8 @@
   // Puts an observer on each div to be reached
   observer5.observe(document.querySelector("#reach5"));
 
-  function fetch_json_and_plot(reached) {
-    // gets the json with Plotly.d3.json and
-    // calls make_graph with the correct target
-    if (reached == "reach1") {
-      Plotly.d3.json(myurl1, (err, raw) =>
-        make_graph(err, raw, "container1")
-      );
-    } else if (reached == "reach2") {
-      Plotly.d3.json(myurl2, (err, raw) =>
-        make_graph(err, raw, "container2")
-      );
-    } else if (reached == "reach3") {
-      Plotly.d3.json(myurl3, (err, raw) =>
-        make_graph(err, raw, "container3")
-      );
-    } else if (reached == "reach4") {
-      Plotly.d3.json(myurl4, (err, raw) =>
-        make_graph(err, raw, "container4")
-      );
-    } else if (reached == "reach5") {
-      Plotly.d3.json(myurl5, (err, raw) =>
-        make_graph(err, raw, "container5")
-      );
-    } else if (reached == "reach6") {
-      Plotly.d3.json(myurl6, (err, raw) =>
-        make_graph(err, raw, "container6")
-      );
-    } else {
-      return;
-    }
-  }
 
-  function make_graph(err, raw, target) {
+  function make_graph5(err, raw, target) {
     // takes data and target and generates the graph
     let layout = {  // Plotly figure layout
       paper_bgcolor: 'rgba(0,0,0,0)',
@@ -2015,6 +1205,11 @@
           y.push(frames[n - 1].data[0].y[12], frames[n - 1].data[1].y[12]);
           shift.push(60, 30);
         }
+        if (target == "container2") {
+          x.push(frames[n - 1].data[0].x[25], frames[n - 1].data[1].x[46]);
+          y.push(frames[n - 1].data[0].y[38], frames[n - 1].data[1].y[46]);
+          shift.push(100, -60);
+        }
         if (target == "container5") {
           x.push(frames[n - 1].data[0].x[48], frames[n - 1].data[1].x[41]);
           y.push(frames[n - 1].data[0].y[48], frames[n - 1].data[1].y[48]);
@@ -2053,9 +1248,6 @@
           y: y[1],
           yshift: shift[1]
         });
-      } else if (target == "container2") {
-        // No annotations for graph 2
-        annotations = [];
       }
     }
     Plotly.plot(
@@ -2132,13 +1324,8 @@
     });
   }
 </script>
-
-
-    <!-- Spacer for testing -->
-    <div class="spacer">
-      Scroll below to activate graph.
-    </div>
-<!-- Include Plotly.js -->
+    <div class="spacer"></div>
+    <!-- Include Plotly.js -->
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <!-- Include Merriweather Sans Font -->
 <link rel="preconnect" href="https://fonts.gstatic.com" />
@@ -2165,7 +1352,9 @@
       if (entries[0].isIntersecting) {
         // Calls the function to get the data and plot the graph
         // Passes the target id of the reached div
-        fetch_json_and_plot(entries[0].target.id);
+        Plotly.d3.json(myurl6, (err, raw) =>
+          make_graph6(err, raw, "container6")
+        );
         observer6.unobserve(entries[0].target);
       }
     },
@@ -2174,39 +1363,8 @@
   // Puts an observer on each div to be reached
   observer6.observe(document.querySelector("#reach6"));
 
-  function fetch_json_and_plot(reached) {
-    // gets the json with Plotly.d3.json and
-    // calls make_graph with the correct target
-    if (reached == "reach1") {
-      Plotly.d3.json(myurl1, (err, raw) =>
-        make_graph(err, raw, "container1")
-      );
-    } else if (reached == "reach2") {
-      Plotly.d3.json(myurl2, (err, raw) =>
-        make_graph(err, raw, "container2")
-      );
-    } else if (reached == "reach3") {
-      Plotly.d3.json(myurl3, (err, raw) =>
-        make_graph(err, raw, "container3")
-      );
-    } else if (reached == "reach4") {
-      Plotly.d3.json(myurl4, (err, raw) =>
-        make_graph(err, raw, "container4")
-      );
-    } else if (reached == "reach5") {
-      Plotly.d3.json(myurl5, (err, raw) =>
-        make_graph(err, raw, "container5")
-      );
-    } else if (reached == "reach6") {
-      Plotly.d3.json(myurl6, (err, raw) =>
-        make_graph(err, raw, "container6")
-      );
-    } else {
-      return;
-    }
-  }
 
-  function make_graph(err, raw, target) {
+  function make_graph6(err, raw, target) {
     // takes data and target and generates the graph
     let layout = {  // Plotly figure layout
       paper_bgcolor: 'rgba(0,0,0,0)',
@@ -2247,238 +1405,124 @@
       });
     }
 
-    // Specific config for each graph
-    if (target == "container1") {
-      layout = { ...layout, showlegend: false };
-    }
-    if (target == "container3") {
-      hover_round = "f";
-      symbol = "$";
-      fill = "tozeroy";
-    }
-    if (target == "container4") {
-      symbol = "";
-      dtick = 5;
-    }
-    if (target == "container5") {
-      layout = { ...layout, showlegend: false };
-    }
-    if (target == "container6") {
-      hover_round = "f";
-      percent = "%";
-      dtick = 5;
-      layout = { ...layout, showlegend: false };
-    }
-
-    // If the graph is multiaxis, configure secondary Y Axis
-    if (raw.has_multiaxis) {
-      sec_yaxis = "y2";
-      primary_yaxis_color = "rgb(124,181,236)";
-      layout = {
-        ...layout,
-        yaxis2: {
-          range: [0.8 * raw.min_y[1], 1.15 * raw.max_y[1]],
-          overlaying: "y",
-          side: "right",
-          showgrid: false,
-          showline: false,
-          showticklabels: true,
-          tickformat: ",.2" + raw.yaxis_tickformat,
-          zeroline: false,
-          ticksuffix: percent,
-          tickfont: {
-            color: "rgb(225,225,225)",
-            family: "Merriweather Sans",
-            size: 15
+    hover_round = "f";
+    percent = "%";
+    dtick = 5;
+    layout = { ...layout, showlegend: false };
+    sec_yaxis = "y2";
+    primary_yaxis_color = "rgb(124,181,236)";
+    layout = {
+      ...layout,
+      yaxis2: {
+        range: [0.8 * raw.min_y[1], 1.15 * raw.max_y[1]],
+        overlaying: "y",
+        side: "right",
+        showgrid: false,
+        showline: false,
+        showticklabels: true,
+        tickformat: ",.2" + raw.yaxis_tickformat,
+        zeroline: false,
+        ticksuffix: percent,
+        tickfont: {
+          color: "rgb(225,225,225)",
+          family: "Merriweather Sans",
+          size: 15
           }
         }
       };
-    } else {
-      // else keep all lines in axis "y"
-      sec_yaxis = "y";
-      primary_yaxis_color = "rgb(225,225,225)";
-    }
-
-    // Config for graphs with 1 line
-    if (raw.y.length == 1) {
-      primary_yaxis_tickformat = symbol + ",.0" + raw.yaxis_tickformat;
-      primary_range = [0.8 * raw.min_y[0], 1.2 * raw.max_y[0]];
-      traces.push({
-        x: frames[1].data[0].x,
-        y: frames[1].data[0].y,
-        fill: fill,
-        name: raw.annotation1,
-        type: "scatter",
-        mode: "markers+lines",
-        marker: { size: 3 },
-        line: { color: "rgb(124,181,236)", width: 2.6 },
-        connectgaps: true,
-        hovertemplate:
-          "<b>%{x}</b>" +
-          "<br>" +
-          raw.annotation1 +
-          ": <b>%{y:" +
-          symbol +
-          ".2" +
-          hover_round +
-          raw.yaxis_tickformat +
-          "}</b><extra></extra>",
-        hoverlabel: {
-          bgcolor: "rgb(240,240,240)",
-          bordercolor: "rgb(124,181,236)",
-          font: {
-            color: "black",
-            family: "Merriweather Sans"
-          }
-        }
-      });
-      annotations.push({
-        showarrow: false,
-        text: "<b>" + raw.annotation1 + "</b>",
+    primary_range = [0.8 * raw.min_y[0], 1.2 * raw.max_y[0]];
+    primary_yaxis_tickformat = ",.0" + raw.yaxis_tickformat;
+    traces.push({
+      // First line
+      x: frames[1].data[0].x,
+      y: frames[1].data[0].y,
+      name: raw.annotation1,
+      type: "scatter",
+      mode: "markers+lines",
+      marker: { size: 3 },
+      line: { color: "rgb(124,181,236)", width: 2.6 },
+      connectgaps: true,
+      hovertemplate:
+        "<b>%{x}</b>" +
+        "<br>" +
+        raw.annotation1 +
+        ": <b>%{y:,.2" +
+        hover_round +
+        raw.yaxis_tickformat +
+        "}</b><extra></extra>",
+      hoverlabel: {
+        bgcolor: "rgb(240,240,240)",
+        bordercolor: "rgb(124,181,236)",
         font: {
-          family: "Merriweather Sans",
-          size: 16,
-          color: "rgb(124,181,236)"
-        },
-        xref: "x",
-        yref: "y",
-        x: frames[n - 1].data[0].x[n - 1],
-        y: frames[n - 1].data[0].y[n - 1],
-        yshift: 30
-      });
-    } else if (raw.y.length == 2) {
-      // Config for graphs with 2 lines
-      if (raw.has_multiaxis) {
-        // 2-line multiaxis
-        primary_range = [0.8 * raw.min_y[0], 1.2 * raw.max_y[0]];
-      } else {
-        // 2-line single axis
-        if (target == 'container1') {
-          primary_range = [
-            0.8 * Math.min(...raw.min_y) - 0.03,
-            1.15 * Math.max(...raw.max_y)
-          ];
-        } else {
-          primary_range = [
-            0.8 * Math.min(...raw.min_y) - 0.1,
-            1.15 * Math.max(...raw.max_y)
-          ];
+          color: "black",
+          family: "Merriweather Sans"
         }
       }
-      primary_yaxis_tickformat = ",.0" + raw.yaxis_tickformat;
-      traces.push({
-        // First line
-        x: frames[1].data[0].x,
-        y: frames[1].data[0].y,
-        name: raw.annotation1,
-        type: "scatter",
-        mode: "markers+lines",
-        marker: { size: 3 },
-        line: { color: "rgb(124,181,236)", width: 2.6 },
-        connectgaps: true,
-        hovertemplate:
-          "<b>%{x}</b>" +
-          "<br>" +
-          raw.annotation1 +
-          ": <b>%{y:,.2" +
-          hover_round +
-          raw.yaxis_tickformat +
-          "}</b><extra></extra>",
-        hoverlabel: {
-          bgcolor: "rgb(240,240,240)",
-          bordercolor: "rgb(124,181,236)",
-          font: {
-            color: "black",
-            family: "Merriweather Sans"
-          }
+    });
+    traces.push({
+      // Second line
+      x: frames[1].data[1].x,
+      y: frames[1].data[1].y,
+      yaxis: sec_yaxis,
+      name: raw.annotation2,
+      type: "scatter",
+      mode: "markers+lines",
+      marker: { size: 3 },
+      line: { color: "rgb(225,225,225)", width: 2.6 },
+      connectgaps: true,
+      hovertemplate:
+        "<b>%{x}</b>" +
+        "<br>" +
+        raw.annotation2 +
+        ": <b>%{y:,.2" +
+        raw.yaxis_tickformat +
+        "}" +
+        percent +
+        "</b><extra></extra>",
+      hoverlabel: {
+        bgcolor: "rgb(240,240,240)",
+        bordercolor: "rgb(225,225,225)",
+        font: {
+          color: "black",
+          family: "Merriweather Sans"
         }
-      });
-      traces.push({
-        // Second line
-        x: frames[1].data[1].x,
-        y: frames[1].data[1].y,
-        yaxis: sec_yaxis,
-        name: raw.annotation2,
-        type: "scatter",
-        mode: "markers+lines",
-        marker: { size: 3 },
-        line: { color: "rgb(225,225,225)", width: 2.6 },
-        connectgaps: true,
-        hovertemplate:
-          "<b>%{x}</b>" +
-          "<br>" +
-          raw.annotation2 +
-          ": <b>%{y:,.2" +
-          raw.yaxis_tickformat +
-          "}" +
-          percent +
-          "</b><extra></extra>",
-        hoverlabel: {
-          bgcolor: "rgb(240,240,240)",
-          bordercolor: "rgb(225,225,225)",
-          font: {
-            color: "black",
-            family: "Merriweather Sans"
-          }
-        }
-      });
-      if (
-        target == "container1" ||
-        target == "container5" ||
-        target == "container6"
-      ) {
-        // Annotations for graphs 1, 5 and 6
-        let x = [];
-        let y = [];
-        let shift = [];
-        if (target == "container1") {
-          x.push(frames[n - 1].data[0].x[12], frames[n - 1].data[1].x[12]);
-          y.push(frames[n - 1].data[0].y[12], frames[n - 1].data[1].y[12]);
-          shift.push(60, 30);
-        }
-        if (target == "container5") {
-          x.push(frames[n - 1].data[0].x[48], frames[n - 1].data[1].x[41]);
-          y.push(frames[n - 1].data[0].y[48], frames[n - 1].data[1].y[48]);
-          shift.push(-30, 45);
-        }
-        if (target == "container6") {
-          x.push(frames[n - 1].data[0].x[29], frames[n - 1].data[1].x[25]);
-          y.push(frames[n - 1].data[0].y[29], frames[n - 1].data[1].y[25]);
-          shift.push(120, -120);
-        }
-        annotations.push({
-          showarrow: false,
-          text: "<b>" + raw.annotation1 + "</b>",
-          font: {
-            family: "Merriweather Sans",
-            size: 16,
-            color: "rgb(124,181,236)"
-          },
-          xref: "x",
-          yref: "y",
-          x: x[0],
-          y: y[0],
-          yshift: shift[0]
-        });
-        annotations.push({
-          showarrow: false,
-          text: "<b>" + raw.annotation2 + "</b>",
-          font: {
-            family: "Merriweather Sans",
-            size: 16,
-            color: "rgb(225,225,225)"
-          },
-          xref: "x",
-          yref: sec_yaxis,
-          x: x[1],
-          y: y[1],
-          yshift: shift[1]
-        });
-      } else if (target == "container2") {
-        // No annotations for graph 2
-        annotations = [];
       }
-    }
+    });
+    let x = [];
+    let y = [];
+    let shift = [];
+    x.push(frames[n - 1].data[0].x[28], frames[n - 1].data[1].x[25]);
+    y.push(frames[n - 1].data[0].y[28], frames[n - 1].data[1].y[25]);
+    shift.push(110, -148);
+
+    annotations.push({
+      showarrow: false,
+      text: "<b>" + raw.annotation1 + "</b>",
+      font: {
+        family: "Merriweather Sans",
+        size: 16,
+        color: "rgb(124,181,236)"
+      },
+      xref: "x",
+      yref: "y",
+      x: x[0],
+      y: y[0],
+      yshift: shift[0]
+    });
+    annotations.push({
+      showarrow: false,
+      text: "<b>" + raw.annotation2 + "</b>",
+      font: {
+        family: "Merriweather Sans",
+        size: 16,
+        color: "rgb(225,225,225)"
+      },
+      xref: "x",
+      yref: sec_yaxis,
+      x: x[1],
+      y: y[1],
+      yshift: shift[1]
+    });
     Plotly.plot(
       // Plotly function to generate graph
       target, // Div id to plot to
@@ -2554,6 +1598,6 @@
   }
 </script>
 
-
+    
       </body>
 </html>
